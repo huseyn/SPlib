@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SPlib.Core.CustomAttributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -25,11 +26,29 @@ namespace SPlib.Core.Helper
             return $"UPDATE {string.Concat(type.Name, "s")} SET {settingPart} {(columnName == null ? string.Empty : conditionPart)}";
         }
 
-        internal static string DeleteSql(Type type, int? id)
+        internal static string DeleteSql(Type type)
         {
-            string columnName = type.GetProperty("Id").Name;
+            string columnName = string.Empty;
+            PropertyInfo[] properties = type.GetProperties();
+
+            PropertyInfo idProp = properties.SingleOrDefault(p => p.GetCustomAttribute<PrimaryKey>() != null);
+            if (idProp != null)
+                columnName = idProp.Name;
+            else
+            {
+                foreach (var property in properties)
+                {
+                    if (property.Name.Equals("Id") || property.Name.Equals(type.Name + "Id"))
+                        columnName = property.Name;
+                }
+            }
+
+            if (string.IsNullOrEmpty(columnName))
+                throw new ArgumentException();
+
+
             string conditionPart = $"WHERE {columnName} = @{columnName}";
-            return $"DELETE {string.Concat(type.Name, "s")} {(columnName == null ? string.Empty : conditionPart)}";
+            return $"DELETE {string.Concat(type.Name, "s")} {conditionPart}";
         }
 
         internal static string SelectSql(Type type, List<int> ids = null)

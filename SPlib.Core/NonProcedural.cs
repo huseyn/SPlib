@@ -167,18 +167,19 @@ namespace SPlib.Core
             }
         }
 
-        public void Delete<T>(int? id = null)
+        public void Delete<T>(T t)
         {
             Type type = typeof(T);
             _command = new SqlCommand()
             {
                 Connection = _connection,
                 Transaction = _transaction,
-                CommandText = StringCommand.DeleteSql(type, id)
+                CommandText = StringCommand.DeleteSql(type)
             };
 
             try
             {
+                int id = EntityModifier.GetIdValue(t);
                 _command.Parameters.AddWithValue("@Id", id);
                 if (_connection.State == ConnectionState.Closed)
                     _connection.Open();
