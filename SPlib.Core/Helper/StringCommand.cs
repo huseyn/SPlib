@@ -17,11 +17,22 @@ namespace SPlib.Core.Helper
             return $"INSERT INTO {string.Concat(type.Name, "s")}({namePart}) " + $"OUTPUT INSERTED.ID VALUES({valuePart})";
         }
 
-        public static string UpdateSql(Type type, int? id)
+        public static string UpdateSql(Type type)
         {
-            IEnumerable<PropertyInfo> properties = type.GetProperties().Where(p => p.Name != "Id");
-            string settingPart = string.Join(",", properties.Select(p => p.Name + "=" + "@" + p.Name));
-            string columnName = type.GetProperty("Id").Name;
+            string columnName = string.Empty;
+            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo idProp = properties.SingleOrDefault(p => p.GetCustomAttribute<PrimaryKey>() != null);
+            if (idProp != null)
+                columnName = idProp.Name;
+            else
+            {
+                foreach (var property in properties)
+                {
+                    if (property.Name.Equals("Id") || property.Name.Equals(type.Name + "Id"))
+                        columnName = property.Name;
+                }
+            }
+            string settingPart = string.Join(",", properties.Where(p => p.GetCustomAttribute<PrimaryKey>() == null).Select(p => p.Name + "=" + "@" + p.Name));
             string conditionPart = $"WHERE {columnName} = @{columnName}";
             return $"UPDATE {string.Concat(type.Name, "s")} SET {settingPart} {(columnName == null ? string.Empty : conditionPart)}";
         }

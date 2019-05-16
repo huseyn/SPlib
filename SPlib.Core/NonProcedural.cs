@@ -130,7 +130,7 @@ namespace SPlib.Core
 
         }
 
-        public void Update<T>(T input, int? id = null)
+        public void Update<T>(T input)
         {
             Type type = typeof(T);
 
@@ -144,14 +144,12 @@ namespace SPlib.Core
             foreach (PropertyInfo property in properties)
                 _command.Parameters.AddWithValue(string.Concat("@", property.Name), property.GetValue(input));
 
-            _command.CommandText = StringCommand.UpdateSql(type, id);
+            _command.CommandText = StringCommand.UpdateSql(type);
             try
             {
                 if (_connection.State == ConnectionState.Closed)
                     _connection.Open();
-                int identity = _command.ExecuteNonQuery();
-                PropertyInfo property = properties.ToList()[0];
-                property.SetValue(input, identity);
+                _command.ExecuteNonQuery();
             }
             catch (Exception ex)
             {

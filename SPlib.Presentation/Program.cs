@@ -13,15 +13,15 @@ namespace SPlib.Presentation
             
             Person p = new Person
             {
-                Id = 3391500,
-                Name = "Baloglan",
-                Surname = "Mikayil",
-                IsAdmin = false
+                Id = 3391493,
+                Name = "Elesger",
+                Surname = "asdfgh",
+                IsAdmin = true
             };
             using (NonProcedural nonProcedural = new NonProcedural(cs))
             {
                 //nonProcedural.BeginTransaction();
-                nonProcedural.Delete(p);
+                nonProcedural.Update(p);
                 //nonProcedural.CommitTransaction();
             }
         }
