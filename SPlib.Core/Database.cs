@@ -9,13 +9,13 @@ using SPlib.Core.Helper;
 
 namespace SPlib.Core
 {
-    public class NonProcedural : IDisposable
+    public class Database : IDisposable
     {
         private readonly SqlConnection _connection;
         private SqlCommand _command;
         private SqlTransaction _transaction;
 
-        public NonProcedural(string connectionString)
+        public Database(string connectionString)
         {
             _connection = new SqlConnection(connectionString);
         }
