@@ -6,6 +6,7 @@ using System.Text;
 using System.Linq;
 using System.Data;
 using SPlib.Core.Helper;
+using System.Data.Common;
 
 namespace SPlib.Core
 {
@@ -73,6 +74,45 @@ namespace SPlib.Core
                         property.SetValue(t, reader[property.Name]);
                     }
                     list.Add(t);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+            finally
+            {
+                if (_transaction == null)
+                {
+                    if (_connection.State == ConnectionState.Open)
+                        _connection.Close();
+                }
+            }
+
+
+            return list;
+        }
+
+        public List<T> Select<T>(string sql, Func<DbDataReader, T> rowMapper)
+        {
+            _command = new SqlCommand()
+            {
+                Connection = _connection,
+                Transaction = _transaction,
+                CommandText = sql
+            };
+
+            List<T> list = new List<T>();
+            try
+            {
+                if (_connection.State == ConnectionState.Closed)
+                    _connection.Open();
+                SqlDataReader reader = _command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    list.Add(rowMapper(reader));
                 }
             }
             catch (Exception ex)
